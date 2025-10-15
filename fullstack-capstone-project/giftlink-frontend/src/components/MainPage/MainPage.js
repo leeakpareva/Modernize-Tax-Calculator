@@ -10,7 +10,7 @@ function MainPage() {
         // Task 1: Write async fetch operation
         const fetchGifts = async () => {
             try {
-                const response = await fetch('http://localhost:3060/api/gifts');
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:3060'}/api/gifts`);
                 const data = await response.json();
                 setGifts(data);
             } catch (error) {
@@ -55,7 +55,7 @@ function MainPage() {
                         <div key={gift.id} className="col-md-4 mb-4">
                             <div className="card product-card h-100">
                                 <img
-                                    src={gift.image ? `http://localhost:3060${gift.image}` : 'https://via.placeholder.com/300x200?text=No+Image'}
+                                    src={gift.image ? `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:3060'}${gift.image}` : 'https://via.placeholder.com/300x200?text=No+Image'}
                                     className="card-img-top"
                                     alt={gift.name}
                                     style={{height: '200px', objectFit: 'cover'}}

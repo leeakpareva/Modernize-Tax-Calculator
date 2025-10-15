@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: giftlink-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-giftdb}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - giftlink-network
+
+  backend:
+    build:
+      context: ./giftlink-backend
+      dockerfile: Dockerfile
+    container_name: giftlink-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3060
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-giftdb}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key}
+    ports:
+      - "3060:3060"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./giftlink-backend/public:/app/public
+    networks:
+      - giftlink-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3060/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./giftlink-frontend
+      dockerfile: Dockerfile
+    container_name: giftlink-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:3060
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - giftlink-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  giftlink-network:
+    driver: bridge

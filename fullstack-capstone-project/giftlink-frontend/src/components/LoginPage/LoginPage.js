@@ -120,6 +120,9 @@ const LoginPage = () => {
       // Store user data
       localStorage.setItem('user', JSON.stringify(data.user));
 
+      // Dispatch custom event to notify other components (like navbar) of login
+      window.dispatchEvent(new Event('userLogin'));
+
       // Redirect to main page or dashboard
       navigate('/app');
     } catch (error) {
