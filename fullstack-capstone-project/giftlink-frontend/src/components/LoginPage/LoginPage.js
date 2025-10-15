@@ -130,30 +130,6 @@ const LoginPage = () => {
     }
   };
 
-  // Function to make authenticated API calls
-  const makeAuthenticatedRequest = async (url, options = {}) => {
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers
-      }
-    });
-
-    if (response.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('authToken');
-      sessionStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      navigate('/login');
-      throw new Error('Session expired. Please login again.');
-    }
-
-    return response;
-  };
 
   const handleForgotPassword = () => {
     navigate('/forgot-password');
@@ -263,7 +239,29 @@ const LoginPage = () => {
   );
 };
 
-// Export the authenticated request function for use in other components
-export { makeAuthenticatedRequest };
+// Function to make authenticated API calls
+export const makeAuthenticatedRequest = async (url, options = {}) => {
+  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
+    }
+  });
+
+  if (response.status === 401) {
+    // Token expired or invalid
+    localStorage.removeItem('authToken');
+    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+    throw new Error('Session expired. Please login again.');
+  }
+
+  return response;
+};
 
 export default LoginPage;
