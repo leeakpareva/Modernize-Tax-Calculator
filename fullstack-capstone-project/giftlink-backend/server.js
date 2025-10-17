@@ -21,8 +21,9 @@ connectToDatabase().then(() => {
 
 app.use(express.json());
 
-// Serve static files (images)
-app.use('/images', express.static('public/images'));
+// Serve static files (images) from frontend public directory
+const path = require('path');
+app.use('/images', express.static(path.join(__dirname, '../giftlink-frontend/public/images')));
 
 // Route files
 // Gift API Task 1: import the giftRoutes and store in a constant called giftroutes
